@@ -11,9 +11,10 @@ machine:
         ANDROID_HOME: /usr/local/android-sdk-linux
 
 dependencies:
-    #pre:
-    #    - wget "https://services.gradle.org/distributions/gradle-2.13-bin.zip"; unzip gradle-2.13-bin.zip
-    #    - source environmentSetup.sh && copyEnvVarsToGradleProperties
+    pre:
+        # Pre-accept Android SDK components licenses
+        - mkdir "$ANDROID_HOME/licenses" || true
+        - echo -e "\n8933bad161af4178b1185d1a37fbf41ea5269c55" > "$ANDROID_HOME/licenses/android-sdk-license"
     override:
         - echo y | android update sdk --no-ui --all --filter build-tools-25.0.3,extra-google-google_play_services
         - ANDROID_HOME=/usr/local/android-sdk-linux ./gradlew dependencies
