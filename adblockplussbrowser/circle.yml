@@ -1,0 +1,75 @@
+#
+# Build configuration for Circle CI
+#
+
+general:
+    artifacts:
+        - /home/ubuntu/adblockplussbrowser/app/build/outputs/apk/
+
+machine:
+    java:
+        version: oraclejdk8
+    environment:
+        ANDROID_HOME: /usr/local/android-sdk-linux
+        ANDROID_BUILD_TOOLS: 25.0.3
+
+dependencies:
+     pre:
+        # Remove any leftover lock from previous builds
+        - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+
+        # Make sure we have the sdkmanager available, and update the Android SDK tools if not
+        - if [ ! -e $ANDROID_HOME/tools/bin/sdkmanager ]; then echo y | android update sdk --no-ui --all --filter tools; fi
+        
+        # Pre-accept Android SDK components licenses
+        - mkdir "$ANDROID_HOME/licenses" || true
+        - echo -e "\n8933bad161af4178b1185d1a37fbf41ea5269c55" > "$ANDROID_HOME/licenses/android-sdk-license"
+
+        # Install all the required SDK components
+        - $ANDROID_HOME/tools/bin/sdkmanager --verbose "platform-tools" "build-tools;"$ANDROID_BUILD_TOOLS "extras;google;m2repository"
+    #pre:
+    #    - wget "https://services.gradle.org/distributions/gradle-2.13-bin.zip"; unzip gradle-2.13-bin.zip
+    #    - source environmentSetup.sh && copyEnvVarsToGradleProperties
+    override:
+        # Force Gradle to pre-download dependencies for the app module (the default would only be for the root, which is useless)
+        - if [ -f ./gradlew ]; then ./gradlew app:dependencies --console=plain --no-daemon;else gradle app:dependencies -
+        #- echo y | android update sdk --no-ui --all --filter build-tools-25.0.3,extra-google-google_play_services
+        #- ANDROID_HOME=/usr/local/android-sdk-linux ./gradlew dependencies
+
+    cache_directories:
+    # Android SDK
+    - /usr/local/android-sdk-linux/tools
+    - /usr/local/android-sdk-linux/platform-tools
+    - /usr/local/android-sdk-linux/build-tools
+    - /usr/local/android-sdk-linux/licenses
+    - /usr/local/android-sdk-linux/extras/google/m2repository
+
+    # Gradle caches
+    - /home/ubuntu/.gradle/caches/
+    - /home/ubuntu/.gradle/wrapper/
+
+test:
+    override:
+        # start the build
+        - ./gradlew check --no-daemon --console=plain --continue
+        - ./gradlew assembleDebug
+        - ./gradlew assembleRelease
+
+    post:
+        - cp -r adblockplussbrowser/build/outputs $CIRCLE_ARTIFACTS
+        - cp -r adblockplussbrowser/build/outputs $CIRCLE_ARTIFACTS
+        # start the emulator
+        # - emulator -avd circleci-android22 -no-audio -no-window:
+        #     background: true
+        #     parallel: true
+        # wait for it to have booted
+        # - circle-android wait-for-boot
+        # unlock the emulator screen
+        # - sleep 30
+        # - adb shell input keyevent 82
+        # run tests  against the emulator.
+        # - ./gradlew connectedDevelopmentDebugAndroidTest -PdisablePreDex
+        # copy the build outputs to artifacts
+        # - cp -r adblockplussbrowser/build/outputs $CIRCLE_ARTIFACTS
+        # copy the test results to the test results directory.
+        # - cp -r adblockplussbrowser/build/outputs/androidTest-results/* $CIRCLE_TEST_REPORTS
