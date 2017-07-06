@@ -7,47 +7,23 @@ general:
         - /home/ubuntu/adblockplussbrowser/app/build/outputs/apk/
 
 machine:
-    java:
-        version: oraclejdk8
     environment:
         ANDROID_HOME: /usr/local/android-sdk-linux
-        ANDROID_BUILD_TOOLS: 25.0.3
 
 dependencies:
-     pre:
-        # Remove any leftover lock from previous builds
-        - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
-        
-        # Pre-accept Android SDK components licenses
-        - mkdir "$ANDROID_HOME/licenses" || true
-        - echo -e "\n8933bad161af4178b1185d1a37fbf41ea5269c55" > "$ANDROID_HOME/licenses/android-sdk-license"
-
+    #pre:
+    #    - wget "https://services.gradle.org/distributions/gradle-2.13-bin.zip"; unzip gradle-2.13-bin.zip
+    #    - source environmentSetup.sh && copyEnvVarsToGradleProperties
     override:
-        # Make sure we have the sdkmanager available
         - echo y | android update sdk --no-ui --all --filter build-tools-25.0.3,extra-google-google_play_services
         - ANDROID_HOME=/usr/local/android-sdk-linux ./gradlew dependencies
-
-    cache_directories:
-    # Android SDK
-    - /usr/local/android-sdk-linux/tools
-    - /usr/local/android-sdk-linux/platform-tools
-    - /usr/local/android-sdk-linux/build-tools
-    - /usr/local/android-sdk-linux/licenses
-    - /usr/local/android-sdk-linux/extras/google/m2repository
-
-    # Gradle caches
-    - /home/ubuntu/.gradle/caches/
-    - /home/ubuntu/.gradle/wrapper/
 
 test:
     override:
         # start the build
-        - ./gradlew check --no-daemon --console=plain --continue
         - ./gradlew assembleDebug
-        - ./gradlew assembleRelease
-
-    post:
         - cp -r adblockplussbrowser/build/outputs $CIRCLE_ARTIFACTS
+        - ./gradlew assembleRelease
         - cp -r adblockplussbrowser/build/outputs $CIRCLE_ARTIFACTS
         # start the emulator
         # - emulator -avd circleci-android22 -no-audio -no-window:
