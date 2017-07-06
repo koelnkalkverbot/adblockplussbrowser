@@ -31,10 +31,8 @@ dependencies:
     #    - wget "https://services.gradle.org/distributions/gradle-2.13-bin.zip"; unzip gradle-2.13-bin.zip
     #    - source environmentSetup.sh && copyEnvVarsToGradleProperties
     override:
-        # Force Gradle to pre-download dependencies for the app module (the default would only be for the root, which is useless)
-        - if [ -f ./gradlew ]; then ./gradlew app:dependencies --console=plain --no-daemon;else gradle app:dependencies -
-        #- echo y | android update sdk --no-ui --all --filter build-tools-25.0.3,extra-google-google_play_services
-        #- ANDROID_HOME=/usr/local/android-sdk-linux ./gradlew dependencies
+        - echo y | android update sdk --no-ui --all --filter build-tools-25.0.3,extra-google-google_play_services
+        - ANDROID_HOME=/usr/local/android-sdk-linux ./gradlew dependencies
 
     cache_directories:
     # Android SDK
