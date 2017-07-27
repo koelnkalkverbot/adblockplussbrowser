@@ -1,0 +1,18 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: bitriseio/docker-android
+    working_directory: ~/adblockplussbrowser
+    steps:
+      - checkout
+      - run:
+          name: Assemble Debug
+          command: ./gradlew assembleDebug 
+          environment:
+            TERM: dumb
+      - run:
+          name: Assemble Release
+          command: ./gradlew assembleRelease 
+          environment:
+            TERM: dumb
