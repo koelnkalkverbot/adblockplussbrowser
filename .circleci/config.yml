@@ -23,3 +23,6 @@ jobs:
       - run:
           name: Assemble Release
           command: ./gradlew assembleRelease 
+      - store_artifacts:
+          path: adblockplussbrowser/build/outputs/apk
+          destination: apks
