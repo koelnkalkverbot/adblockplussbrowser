@@ -18,11 +18,20 @@ jobs:
             - ~/.gradle
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "adblockplussbrowser/build.gradle" }}
       - run:
+          name: Run Checks
+          command: ./gradlew --no-daemon --stacktrace lint checkDebug checkstyle
+
+          mkdir lint_reports || true
+          cp -r adblockplussbrowser/build/reports/ lint_reports/
+      - store_artifacts:
+          path: lint_reports/
+          destination: lint_reports/
+      - run:
           name: Assemble Debug
           command: ./gradlew assembleDebug 
       - run:
           name: Assemble Release
           command: ./gradlew assembleRelease 
       - store_artifacts:
-          path: adblockplussbrowser/build/outputs/apk
-          destination: apks
+          path: adblockplussbrowser/build/outputs/apk/
+          destination: apks/
