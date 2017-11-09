@@ -1,17 +1,25 @@
 buildscript {
+    // buildscript block is evaluated at the very beginning. Properties defined in the ext block
+    // don't exist at that time.
+    ext.kotlinVersion = '1.1.51'
     repositories {
-        jcenter()
         google()
+        jcenter()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.0.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
 }
 
 allprojects {
     repositories {
         jcenter()
-        google()
+        mavenCentral()
+        maven {
+            url 'https://maven.google.com/'
+            name 'Google'
+        }
     }
 }
 
@@ -23,4 +31,8 @@ ext {
     androidSupportLibraryVersion = '27.0.0'
     sourceCompatibilityVersion = JavaVersion.VERSION_1_7
     targetCompatibilityVersion = JavaVersion.VERSION_1_7
+    easyListUpdateUrl = 'https://easylist-downloads.adblockplus.org/easylist.txt'
+    exceptionRulesUpdateUrl = 'https://easylist-downloads.adblockplus.org/exceptionrules.txt'
+    easyListFilePath = file('adblockplussbrowser/res/raw/easylist.txt').absolutePath
+    exceptionRulesFilePath = file('adblockplussbrowser/res/raw/exceptionrules.txt').absolutePath
 }
